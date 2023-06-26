@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-gstd = { git = "https://github.com/gear-tech/gear.git", features = ["debug"], branch = "testnet"}
+gstd = { git = "https://github.com/gear-tech/gear.git", features = ["debug"], rev = "78dfa07"}
 scale-info = { version = "2", default-features = false, features = ["derive"] }
 parity-scale-codec = { version = "3", default-features = false }
 ark-bn254 = { git = "https://github.com/arkworks-rs/curves.git" }
@@ -14,10 +14,10 @@ ark-serialize = { version = "0.4", features = ["derive"] }
 hex-literal = "0.3.4"
 
 [build-dependencies]
-gear-wasm-builder = { git = "https://github.com/gear-tech/gear.git", branch = "testnet" }
+gear-wasm-builder = { git = "https://github.com/gear-tech/gear.git", rev = "78dfa07" }
 
 [dev-dependencies]
-gtest = { git = "https://github.com/gear-tech/gear.git", branch = "testnet"}
+gtest = { git = "https://github.com/gear-tech/gear.git", rev = "78dfa07"}
 ark-std = "0.4.0"
 gclient = { git = "https://github.com/gear-tech/gear.git" }
 tokio = "1"

@@ -24,6 +24,10 @@ pub enum HandleMessage {
         signatures: Vec<Vec<u8>>,
     },
     Exp,
+    Verify {
+        message: Vec<u8>,
+        signatures: Vec<Vec<u8>>,
+    }
 }
 
 #[derive(Encode, Decode)]
@@ -53,6 +57,21 @@ impl BnContract {
             self.miller_out = (None, None);
         }
     }
+
+    fn verify(&mut self, message: Vec<u8>, signatures: Vec<Vec<u8>>) {
+        let mut aggregate_signature: G1Affine = Default::default();
+        for signature in signatures.iter() {
+            let signature = G1Affine::deserialize_compressed(&**signature).unwrap();
+            aggregate_signature = (aggregate_signature + signature).into();
+        }
+
+        let message = G1Affine::deserialize_compressed(&*message).unwrap();
+
+        let e1 = Bn254::pairing(message, self.aggregate_pub_key);
+        let e2 = Bn254::pairing(aggregate_signature, self.g2_gen);
+
+        assert_eq!(e1, e2);
+    }
 }
 
 #[no_mangle]
@@ -69,6 +88,7 @@ extern "C" fn handle() {
             bn_contract.miller_loop(message, signatures)
         }
         HandleMessage::Exp => bn_contract.exp(),
+        HandleMessage::Verify { message, signatures } => bn_contract.verify(message, signatures),
     }
 }
 

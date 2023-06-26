@@ -52,6 +52,7 @@ async fn upload_program(
     Ok(program_id)
 }
 
+#[ignore]
 #[tokio::test]
 async fn bn_verify_node() -> Result<()> {
     let client = GearApi::dev().await?.with("//Alice")?;
