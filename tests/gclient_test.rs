@@ -11,6 +11,8 @@ use test_bn254::*;
 const PATH: &str = "./target/wasm32-unknown-unknown/release/test_bn254.opt.wasm";
 
 
+type ArkScale<T> = ark_scale::ArkScale<T, { ark_scale::HOST_CALL }>;
+
 async fn common_upload_program(
     client: &GearApi,
     code: Vec<u8>,
@@ -52,7 +54,7 @@ async fn upload_program(
     Ok(program_id)
 }
 
-#[ignore]
+// #[ignore]
 #[tokio::test]
 async fn bn_verify_node() -> Result<()> {
     let client = GearApi::dev().await?.with("//Alice")?;
@@ -69,18 +71,21 @@ async fn bn_verify_node() -> Result<()> {
         let priv_key: ScalarField = UniformRand::rand(&mut rng);
         let pub_key: G2Affine = generator.mul(priv_key).into();
         let mut pub_key_bytes = Vec::new();
-        pub_key.serialize_compressed(&mut pub_key_bytes).unwrap();
+        pub_key.serialize_uncompressed(&mut pub_key_bytes).unwrap();
         pub_keys.push(pub_key_bytes);
 
          // sign
         let signature: G1Affine = message.mul(priv_key).into();
         let mut sig_bytes = Vec::new();
-        signature.serialize_compressed(&mut sig_bytes).unwrap();
+        signature.serialize_uncompressed(&mut sig_bytes).unwrap();
         signatures.push(sig_bytes);   
     }
-    
+
+    // let serialized_generator: ArkScale<_> = generator.into();
+    // let gen_bytes = serialized_generator.encode();
+
     let mut gen_bytes = Vec::new();
-    generator.serialize_compressed(&mut gen_bytes).unwrap();
+    generator.serialize_uncompressed(&mut gen_bytes).unwrap();
 
     let program_id = upload_program(
         &client,

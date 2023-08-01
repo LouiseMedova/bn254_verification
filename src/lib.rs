@@ -5,6 +5,8 @@ use ark_ec::Group;
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use gstd::{debug, msg, prelude::*};
 
+type ArkScale<T> = ark_scale::ArkScale<T, { ark_scale::HOST_CALL }>;
+
 #[derive(Default)]
 pub struct BnContract {
     g2_gen: G2Affine,
@@ -96,19 +98,26 @@ extern "C" fn handle() {
 extern "C" fn init() {
     let init_msg: InitMessage = msg::load().expect("Unable to decode `InitMessage`");
 
-    let g2_gen = G2Affine::deserialize_compressed(&*init_msg.g2_gen).unwrap();
+    // let g2_gen = <ArkScale<<ark_bls12_381::Bls12_381 as Pairing>::G2Affine> as Decode>::decode(&mut init_msg.g2_gen.as_slice())
+    //     .unwrap();
+    let g2_gen = <ArkScale<<ark_bn254::Bn254 as Pairing>::G2Affine> as Decode>::decode(&mut init_msg.g2_gen.as_slice())
+        .unwrap();
+
+    // let g2_gen = G2Affine::deserialize_compressed(&*init_msg.g2_gen).unwrap();
 
     let mut pub_keys = Vec::new();
     let mut aggregate_pub_key: G2Affine = Default::default();
 
     for pub_key_bytes in init_msg.pub_keys.iter() {
-       let pub_key = G2Affine::deserialize_compressed(&**pub_key_bytes).unwrap();
-       aggregate_pub_key =  (aggregate_pub_key + pub_key).into();
-       pub_keys.push(pub_key);
+    //    let pub_key = G2Affine::deserialize_compressed(&**pub_key_bytes).unwrap();
+       let pub_key = <ArkScale<<ark_bn254::Bn254 as Pairing>::G2Affine> as Decode>::decode(&mut pub_key_bytes.as_slice())
+            .unwrap();
+       aggregate_pub_key = (aggregate_pub_key + pub_key.0).into();
+       pub_keys.push(pub_key.0);
     }
 
     let bn_contract = BnContract {
-        g2_gen,
+        g2_gen: g2_gen.0,
         pub_keys,
         aggregate_pub_key,
         miller_out: (None, None),
