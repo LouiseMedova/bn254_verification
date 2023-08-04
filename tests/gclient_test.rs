@@ -1,12 +1,12 @@
-use ark_bn254::{Bn254, G1Affine, G1Projective as G1, G2Affine, G2Projective as G2};
+use ark_bls12_381::{Bls12_381, G1Affine, G1Projective as G1, G2Affine, G2Projective as G2};
 use ark_ec::{
     pairing::{Pairing, PairingOutput},
     CurveGroup, Group,
 };
-use ark_serialize::{CanonicalSerialize};
+use ark_serialize::CanonicalSerialize;
 use ark_std::{ops::Mul, UniformRand};
 use gclient::{EventListener, EventProcessor, GearApi, Result};
-use gstd::{prelude::*};
+use gstd::prelude::*;
 use test_bn254::*;
 const PATH: &str = "./target/wasm32-unknown-unknown/release/test_bn254.opt.wasm";
 
@@ -99,7 +99,7 @@ async fn bn_verify_node() -> Result<()> {
     .await?;
 
     let mut message_bytes = Vec::new();
-    message.serialize_compressed(&mut message_bytes).unwrap();
+    message.serialize_uncompressed(&mut message_bytes).unwrap();
 
     let payload = HandleMessage::MillerLoop {
         message: message_bytes,
